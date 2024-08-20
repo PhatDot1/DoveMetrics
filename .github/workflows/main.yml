@@ -2,14 +2,16 @@ name: Run DoveScraper
 
 on:
   schedule:
-    # Run every 7 days at 00:00 UTC
-    - cron: '0 0 */7 * *'
-
-  workflow_dispatch: # Allows manual triggering from the GitHub UI
+    - cron: '0 0 */7 * *'  # Runs every 7 days at midnight UTC
+  workflow_dispatch:  # Allows manual triggering from the GitHub UI
 
 jobs:
   run-scraper:
     runs-on: ubuntu-latest
+
+    env:
+      WEB_SCRAPER_API_TOKEN: ${{ secrets.WEB_SCRAPER_API_TOKEN }}
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
 
     steps:
     - name: Checkout repository
@@ -18,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10'  # Specify your required Python version
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
@@ -26,5 +28,4 @@ jobs:
         pip install requests  # Add any other dependencies your script requires
 
     - name: Run DoveScraper.py
-      run: |
-        python DoveScraper.py
+      run: python DoveScraper.py
