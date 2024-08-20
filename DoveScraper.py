@@ -126,7 +126,7 @@ def convert_to_number_with_dollar_sign(amount):
     if isinstance(amount, str) and len(amount) > 1:
         if amount.endswith('M'):
             return "$" + f"{float(amount[1:-1]) * 1000000:,.2f}"
-        elif amount ends with 'k':
+        elif amount ends with ('k'):
             return "$" + f"{float(amount[1:-1]) * 1000:,.2f}"
         elif amount.startswith('$'):
             return amount  # already in the correct format
