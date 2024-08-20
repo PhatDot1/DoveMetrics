@@ -1,9 +1,9 @@
+import os
 import requests
 import json
 import time
 import csv
 import re
-import os
 from datetime import datetime, timedelta
 
 # Load API tokens from environment variables
@@ -77,47 +77,52 @@ if response.status_code == 200:
         print('Waiting for 15 minutes before checking the scraping job status...')
         time.sleep(900)
 
-        # Get the results of the scraping job
-        get_job_url = f'https://api.webscraper.io/api/v1/scraping-job/{scraping_job_id}?api_token={API_TOKEN}'
-        job_response = requests.get(get_job_url, headers=HEADERS)
+        # Poll the scraping job status until it's finished
+        job_finished = False
+        while not job_finished:
+            get_job_url = f'https://api.webscraper.io/api/v1/scraping-job/{scraping_job_id}?api_token={API_TOKEN}'
+            job_response = requests.get(get_job_url, headers=HEADERS)
 
-        if job_response.status_code == 200:
-            job_data = job_response.json().get('data', {})
-            print('Scraping job details:')
-            print(json.dumps(job_data, indent=4))
+            if job_response.status_code == 200:
+                job_data = job_response.json().get('data', {})
+                print('Scraping job details:')
+                print(json.dumps(job_data, indent=4))
 
-            # Fetch the scraped data (assuming it is stored within the job data)
-            if job_data['status'] == 'finished':
-                # Assuming `stored_record_count` shows if there is data available
-                if job_data.get('stored_record_count', 0) > 0:
-                    # Now, let's fetch the actual data
-                    get_data_url = f'https://api.webscraper.io/api/v1/scraping-job/{scraping_job_id}/csv?api_token={API_TOKEN}'
-                    data_response = requests.get(get_data_url, headers=HEADERS)
+                # Check the status of the job
+                if job_data['status'] == 'finished':
+                    job_finished = True
+                    print('Scraping job finished successfully.')
 
-                    if data_response.status_code == 200:
-                        # Save the CSV content to a file
-                        with open('scraping_results.csv', 'w', newline='', encoding='utf-8') as file:
-                            file.write(data_response.text)
-                        print('Scraping results saved to scraping_results.csv')
+                    # Fetch the scraped data
+                    if job_data.get('stored_record_count', 0) > 0:
+                        get_data_url = f'https://api.webscraper.io/api/v1/scraping-job/{scraping_job_id}/csv?api_token={API_TOKEN}'
+                        data_response = requests.get(get_data_url, headers=HEADERS)
+
+                        if data_response.status_code == 200:
+                            # Save the CSV content to a file
+                            with open('scraping_results.csv', 'w', newline='', encoding='utf-8') as file:
+                                file.write(data_response.text)
+                            print('Scraping results saved to scraping_results.csv')
+                        else:
+                            print(f'Failed to retrieve scraping results. Status code: {data_response.status_code}')
+                            print(data_response.text)
                     else:
-                        print(f'Failed to retrieve scraping results. Status code: {data_response.status_code}')
-                        print(data_response.text)
+                        print('No data was stored by the scraping job.')
                 else:
-                    print('No data was stored by the scraping job.')
+                    print(f'Scraping job is still in progress. Status: {job_data["status"]}')
+                    time.sleep(300)  # Wait for 5 minutes before checking again
             else:
-                print(f'The scraping job did not finish successfully. Status: {job_data["status"]}')
-
-        else:
-            print(f'Failed to get scraping job details. Status code: {job_response.status_code}')
-            print(job_response.text)  # Print response text for debugging
+                print(f'Failed to get scraping job details. Status code: {job_response.status_code}')
+                print(job_response.text)
+                break
 
     else:
         print(f'Failed to start scraping job. Status code: {trigger_response.status_code}')
-        print(trigger_response.text)  # Print response text for debugging
+        print(trigger_response.text)
 
 else:
     print(f'Failed to modify sitemap. Status code: {response.status_code}')
-    print(response.text)  # Print response text for debugging
+    print(response.text)
 
 # If the above step is successful, process the CSV and upload it to Airtable
 
@@ -216,7 +221,9 @@ def upload_to_airtable(cleaned_data, api_key, base_id, table_id):
             print(f"Response: {response.text}")
 
 # Process the data
-cleaned_data = process_data('scraping_results.csv')
-
-# Upload to Airtable
-upload_to_airtable(cleaned_data, AIRTABLE_API_KEY, BASE_ID, TABLE_ID)
+if os.path.exists('scraping_results.csv'):
+    cleaned_data = process_data('scraping_results.csv')
+    # Upload to Airtable
+    upload_to_airtable(cleaned_data, AIRTABLE_API_KEY, BASE_ID, TABLE_ID)
+else:
+    print("No CSV file found, skipping Airtable upload.")
