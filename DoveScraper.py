@@ -73,9 +73,9 @@ if response.status_code == 200:
         scraping_job_id = trigger_response.json().get('data', {}).get('id')
         print(f'Scraping Job ID: {scraping_job_id}')
 
-        # Wait for 15 minutes (900 seconds)
-        print('Waiting for 15 minutes before checking the scraping job status...')
-        time.sleep(900)
+        # Wait for 10 minutes (600 seconds)
+        print('Waiting for 10 minutes before checking the scraping job status...')
+        time.sleep(600)
 
         # Poll the scraping job status until it's finished
         job_finished = False
