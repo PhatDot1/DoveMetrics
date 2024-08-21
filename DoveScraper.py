@@ -18,7 +18,7 @@ HEADERS = {'Content-Type': 'application/json'}
 
 # Airtable API details
 BASE_ID = 'appmaoZN0UuSrbWaW'
-TABLE_ID = 'tblMvPqfxBLHLvUpf'
+TABLE_ID = 'tblfZgkeDf4IC4OEv'
 
 # Calculate the required dates
 today = datetime.today()
@@ -73,9 +73,9 @@ if response.status_code == 200:
         scraping_job_id = trigger_response.json().get('data', {}).get('id')
         print(f'Scraping Job ID: {scraping_job_id}')
 
-        # Wait for 10 minutes (600 seconds)
-        print('Waiting for 10 minutes before checking the scraping job status...')
-        time.sleep(600)
+        # Wait for 15 minutes (900 seconds)
+        print('Waiting for 15 minutes before checking the scraping job status...')
+        time.sleep(900)
 
         # Poll the scraping job status until it's finished
         job_finished = False
@@ -124,8 +124,6 @@ else:
     print(f'Failed to modify sitemap. Status code: {response.status_code}')
     print(response.text)
 
-# If the above step is successful, process the CSV and upload it to Airtable
-
 def convert_to_number_with_dollar_sign(amount):
     """Convert amount string like '$3M' or '$4k' to a full numeric value with a dollar sign."""
     if isinstance(amount, str) and len(amount) > 1:
@@ -164,8 +162,8 @@ def process_data(input_csv):
         row = data[i]
 
         # Clean 'Project' and 'Investors' fields
-        project = clean_text_field(row[0])
-        investors = clean_text_field(row[6])
+        project_name = clean_text_field(row[0])
+        investor_names = clean_text_field(row[6])
 
         # Convert the raised amount to numerical value with dollar sign
         raised_amount = convert_to_number_with_dollar_sign(row[3])
@@ -183,10 +181,10 @@ def process_data(input_csv):
 
         # Collect cleaned data in a dictionary
         record = {
-            '🏛 Companies/Protocols': project,
+            '🏛 Companies/Protocols': project_name,
             'Date': row[4],
             'Round size': raised_amount,
-            'Investors': investors.split(', '),  # Assuming Investors are separated by commas
+            'Investors': investor_names,
             'Stage': row[5],
             'Description': description,
             'Website': website_href,
