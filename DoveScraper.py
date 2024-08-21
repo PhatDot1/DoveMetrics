@@ -18,7 +18,7 @@ HEADERS = {'Content-Type': 'application/json'}
 
 # Airtable API details
 BASE_ID = 'appmaoZN0UuSrbWaW'
-TABLE_ID = 'tblfZgkeDf4IC4OEv'
+TABLE_ID = 'tblMvPqfxBLHLvUpf'
 
 # Calculate the required dates
 today = datetime.today()
