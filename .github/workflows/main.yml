@@ -2,8 +2,8 @@ name: Run DoveScraper
 
 on:
   schedule:
-    - cron: '0 0 */7 * *'  # Runs every 7 days at midnight UTC
-  workflow_dispatch:  # Allows manual triggering from the GitHub UI
+    - cron: '0 0 */7 * *'  # Runs every 7 days at midnight UTC - updating to keep from deactivating
+  workflow_dispatch:  # Allows manual triggering from the GitHub UI 
 
 jobs:
   run-scraper:
