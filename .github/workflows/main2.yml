@@ -2,7 +2,8 @@ name: Run DoveScraper2
 
 on:
   schedule:
-    - cron: '0 0 */1 * *'   # updating to keep from deactivating
+    # Killed process
+    #- cron: '0 0 */1 * *'   # updating to keep from deactivating
   workflow_dispatch:  
 
 jobs:
